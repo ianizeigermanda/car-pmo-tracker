@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAR PMO – Plano de Ação Maio 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f8f6;color:#1a1a18;min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+header{margin-bottom:2rem}
+header h1{font-size:20px;font-weight:500;color:#1a1a18;margin-bottom:4px}
+header p{font-size:13px;color:#888780}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:#fff;border-radius:8px;border:0.5px solid #e0ded6;padding:12px 16px}
+.stat-label{font-size:11.5px;color:#888780;margin-bottom:4px}
+.stat-val{font-size:24px;font-weight:500}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.filters label{font-size:13px;color:#888780;margin-right:2px}
+select{font-size:13px;padding:5px 10px;border-radius:8px;border:0.5px solid #c8c6be;background:#fff;color:#1a1a18;cursor:pointer;outline:none}
+select:hover{border-color:#a0a09a}
+.group-block{margin-bottom:1.5rem}
+.group-header{font-size:11px;font-weight:500;color:#888780;letter-spacing:.06em;text-transform:uppercase;padding:0 0 6px;border-bottom:0.5px solid #e0ded6;margin-bottom:4px}
+.header-row{display:grid;grid-template-columns:minmax(0,2fr) 140px 80px 130px minmax(0,1.2fr);border-radius:8px 8px 0 0;overflow:hidden;margin-bottom:4px;border:0.5px solid #c8c6be}
+.col-head{font-size:11px;font-weight:500;color:#888780;padding:7px 10px;background:#f1efe8;text-transform:uppercase;letter-spacing:.04em}
+.delivery{border-radius:8px;overflow:hidden;margin-bottom:3px;border:0.5px solid #e0ded6}
+.delivery-row{display:grid;grid-template-columns:minmax(0,2fr) 140px 80px 130px minmax(0,1.2fr);background:#fff;transition:background .1s}
+.delivery-row:hover{background:#f8f8f6}
+.col{padding:9px 10px;font-size:12.5px;color:#1a1a18;border-bottom:0.5px solid #f1efe8}
+.col-task{line-height:1.45;display:flex;align-items:flex-start;gap:6px}
+.col-task.is-main{font-weight:500;font-size:13px}
+.col-task.is-sub{padding-left:18px;color:#5f5e5a}
+.col-meta{color:#5f5e5a;font-size:12px;display:flex;align-items:flex-start;padding-top:10px}
+.col-comment{font-size:11.5px;color:#5f5e5a;line-height:1.5;display:flex;align-items:flex-start;padding-top:9px}
+.sub-icon{color:#b4b2a9;font-size:11px;flex-shrink:0;margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.s-green{background:#EAF3DE;color:#3B6D11}
+.s-yellow{background:#FAEEDA;color:#854F0B}
+.s-red{background:#FCEBEB;color:#A32D2D}
+.s-gray{background:#F1EFE8;color:#5F5E5A}
+.s-blue{background:#E6F1FB;color:#185FA5}
+.s-purple{background:#EEEDFE;color:#534AB7}
+.loading{text-align:center;padding:3rem;color:#888780;font-size:14px}
+.error{text-align:center;padding:3rem;color:#A32D2D;font-size:14px}
+.updated{font-size:11.5px;color:#b4b2a9;margin-top:1.5rem;text-align:right}
+@media(max-width:640px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .header-row,.delivery-row{grid-template-columns:minmax(0,1fr) 110px}
+  .col-head:nth-child(2),.col-head:nth-child(3),.col-head:nth-child(5),
+  .col:nth-child(2),.col:nth-child(3),.col:nth-child(5){display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>CAR PMO – Plano de Ação</h1>
+    <p>DIGEO · Pará · Atualizado automaticamente via Google Sheets</p>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters">
+    <label>Grupo</label>
+    <select id="fGrupo" onchange="render()"><option value="">Todos</option></select>
+    <label style="margin-left:8px">Status</label>
+    <select id="fStatus" onchange="render()">
+      <option value="">Todos</option>
+      <option>Em andamento, conforme esperado</option>
+      <option>Em andamento, com pontos de atenção</option>
+      <option>Em atraso ou com bloqueios críticos</option>
+      <option>Não iniciado</option>
+      <option>Backlog</option>
+      <option>Concluído</option>
+    </select>
+  </div>
+
+  <div class="header-row">
+    <div class="col-head">Entrega</div>
+    <div class="col-head">Responsável</div>
+    <div class="col-head">Prazo</div>
+    <div class="col-head">Status</div>
+    <div class="col-head">Comentário / Próximos passos</div>
+  </div>
+
+  <div id="board"><div class="loading"><i class="ti ti-loader" style="font-size:20px;vertical-align:-4px;margin-right:6px"></i>Carregando dados...</div></div>
+  <div class="updated" id="updated"></div>
+</div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxYfuTBlgoK9VlLKTKrtqknRRSJv6urDV3uz2Lfdj03Lgzmc3GLgtvvjbIMhESPKb6NMKTvF0hC408/pub?output=csv";
+
+let allData = [];
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",").map(h => h.replace(/"/g,"").trim());
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = "", inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ""; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (cols[i] || "").replace(/^"|"$/g,"").trim());
+    return obj;
+  }).filter(r => r["Entrega Prioritária"] && r["Entrega Prioritária"].length > 0);
+}
+
+function isMain(row) {
+  const grupo = row["Grupo"] || "";
+  const entrega = row["Entrega Prioritária"] || "";
+  return grupo.length > 0 && entrega.length > 0;
+}
+
+function badge(s) {
+  s = (s || "").trim();
+  const norm = s.replace(/\u200b/g,"").toLowerCase();
+  let cls, icon, label;
+  if (norm.includes("conforme")) { cls="s-green"; icon="ti-circle-check"; label="Em andamento"; }
+  else if (norm.includes("atenção") || norm.includes("atencao")) { cls="s-yellow"; icon="ti-alert-triangle"; label="Pontos de atenção"; }
+  else if (norm.includes("atraso") || norm.includes("bloqueio")) { cls="s-red"; icon="ti-circle-x"; label="Em atraso"; }
+  else if (norm.includes("não iniciado") || norm.includes("nao iniciado")) { cls="s-gray"; icon="ti-circle"; label="Não iniciado"; }
+  else if (norm.includes("backlog")) { cls="s-blue"; icon="ti-clock"; label="Backlog"; }
+  else if (norm.includes("concluído") || norm.includes("concluido")) { cls="s-purple"; icon="ti-circle-check"; label="Concluído"; }
+  else { cls="s-gray"; icon="ti-circle"; label=s||"—"; }
+  return `<span class="badge ${cls}"><i class="ti ${icon}" aria-hidden="true"></i>${label}</span>`;
+}
+
+function populateGroupFilter(data) {
+  const groups = [...new Set(data.map(d => d["Grupo"]).filter(Boolean))];
+  const sel = document.getElementById("fGrupo");
+  sel.innerHTML = '<option value="">Todos</option>' + groups.map(g => `<option>${g}</option>`).join("");
+}
+
+function render() {
+  const gf = document.getElementById("fGrupo").value;
+  const sf = document.getElementById("fStatus").value;
+
+  const filtered = allData.filter(d => {
+    const status = (d["Status"] || "").replace(/\u200b/g,"").trim();
+    const norm = status.toLowerCase();
+    if (gf && d["Grupo"] !== gf) return false;
+    if (sf) {
+      const sfn = sf.toLowerCase();
+      if (sfn.includes("conforme") && !norm.includes("conforme")) return false;
+      if (sfn.includes("atenção") && !norm.includes("atenção") && !norm.includes("atencao")) return false;
+      if (sfn.includes("atraso") && !norm.includes("atraso") && !norm.includes("bloqueio")) return false;
+      if (sfn === "não iniciado" && !norm.includes("não iniciado") && !norm.includes("nao iniciado")) return false;
+      if (sfn === "backlog" && !norm.includes("backlog")) return false;
+      if (sfn.includes("concluído") && !norm.includes("concluído") && !norm.includes("concluido")) return false;
+    }
+    return true;
+  });
+
+  const groups = [...new Set(filtered.map(d => d["Grupo"]).filter(Boolean))];
+  let html = "";
+
+  groups.forEach(g => {
+    const rows = filtered.filter(d => d["Grupo"] === g);
+    html += `<div class="group-block"><div class="group-header">${g}</div>`;
+    rows.forEach(r => {
+      const main = isMain(r);
+      const task = r["Entrega Prioritária"] || "";
+      const resp = r["Responsável"] || "—";
+      const prazo = r["Prazo"] || "—";
+      const status = r["Status"] || "";
+      const comment = r["Comentário / Próximos Passos"] || r["Coment\u00e1rio / Pr\u00f3ximos Passos"] || "";
+      html += `<div class="delivery"><div class="delivery-row">
+        <div class="col col-task ${main ? 'is-main' : 'is-sub'}">
+          ${!main ? '<i class="ti ti-corner-down-right sub-icon" aria-hidden="true"></i>' : ''}
+          <span>${task}</span>
+        </div>
+        <div class="col col-meta">${resp}</div>
+        <div class="col col-meta">${prazo}</div>
+        <div class="col col-meta">${badge(status)}</div>
+        <div class="col col-comment">${comment || '<span style="color:#d3d1c7">—</span>'}</div>
+      </div></div>`;
+    });
+    html += "</div>";
+  });
+
+  document.getElementById("board").innerHTML = html || '<p style="font-size:13px;color:#888780;padding:1rem 0">Nenhum resultado encontrado.</p>';
+
+  const total = allData.length;
+  const atraso = allData.filter(d => { const n=(d["Status"]||"").toLowerCase(); return n.includes("atraso")||n.includes("bloqueio"); }).length;
+  const andamento = allData.filter(d => (d["Status"]||"").toLowerCase().includes("andamento")).length;
+  const niniciado = allData.filter(d => { const n=(d["Status"]||"").replace(/\u200b/g,"").toLowerCase(); return n.includes("não iniciado")||n.includes("nao iniciado"); }).length;
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="stat-label">Total entregas</div><div class="stat-val">${total}</div></div>
+    <div class="stat"><div class="stat-label">Em andamento</div><div class="stat-val" style="color:#3B6D11">${andamento}</div></div>
+    <div class="stat"><div class="stat-label">Não iniciado</div><div class="stat-val" style="color:#5F5E5A">${niniciado}</div></div>
+    <div class="stat"><div class="stat-label">Em atraso</div><div class="stat-val" style="color:#A32D2D">${atraso}</div></div>
+  `;
+}
+
+async function load() {
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error("Erro ao carregar dados");
+    const text = await res.text();
+    allData = parseCSV(text);
+    populateGroupFilter(allData);
+    render();
+    const now = new Date();
+    document.getElementById("updated").textContent = `Última atualização: ${now.toLocaleString("pt-BR")}`;
+  } catch(e) {
+    document.getElementById("board").innerHTML = `<div class="error"><i class="ti ti-alert-circle" style="font-size:20px;vertical-align:-4px;margin-right:6px"></i>Não foi possível carregar os dados. Verifique se a planilha está publicada.</div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
