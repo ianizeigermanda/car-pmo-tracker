@@ -30,7 +30,7 @@ select:hover{border-color:#a0a09a}
 .col{padding:9px 10px;font-size:12.5px;color:#1a1a18;border-bottom:0.5px solid #f1efe8}
 .col-task{line-height:1.45;display:flex;align-items:flex-start;gap:6px}
 .col-task.is-main{font-weight:500;font-size:13px}
-.col-task.is-sub{padding-left:18px;color:#5f5e5a}
+.col-task.is-sub{padding-left:18px;color:#5f5e5a;font-weight:400}
 .col-meta{color:#5f5e5a;font-size:12px;display:flex;align-items:flex-start;padding-top:10px}
 .col-comment{font-size:11.5px;color:#5f5e5a;line-height:1.5;display:flex;align-items:flex-start;padding-top:9px}
 .sub-icon{color:#b4b2a9;font-size:11px;flex-shrink:0;margin-top:2px}
@@ -112,18 +112,12 @@ function parseCSV(text) {
   }).filter(r => r["Entrega Prioritária"] && r["Entrega Prioritária"].length > 0);
 }
 
-function isMain(row) {
-  const grupo = row["Grupo"] || "";
-  const entrega = row["Entrega Prioritária"] || "";
-  return grupo.length > 0 && entrega.length > 0;
-}
-
 function badge(s) {
   s = (s || "").trim();
   const norm = s.replace(/\u200b/g,"").toLowerCase();
   let cls, icon, label;
   if (norm.includes("conforme")) { cls="s-green"; icon="ti-circle-check"; label="Em andamento"; }
-  else if (norm.includes("atenção") || norm.includes("atencao")) { cls="s-yellow"; icon="ti-alert-triangle"; label="Pontos de atenção"; }
+  else if (norm.includes("atenção") || norm.includes("atencao") || norm.includes("atencão")) { cls="s-yellow"; icon="ti-alert-triangle"; label="Pontos de atenção"; }
   else if (norm.includes("atraso") || norm.includes("bloqueio")) { cls="s-red"; icon="ti-circle-x"; label="Em atraso"; }
   else if (norm.includes("não iniciado") || norm.includes("nao iniciado")) { cls="s-gray"; icon="ti-circle"; label="Não iniciado"; }
   else if (norm.includes("backlog")) { cls="s-blue"; icon="ti-clock"; label="Backlog"; }
@@ -149,7 +143,7 @@ function render() {
     if (sf) {
       const sfn = sf.toLowerCase();
       if (sfn.includes("conforme") && !norm.includes("conforme")) return false;
-      if (sfn.includes("atenção") && !norm.includes("atenção") && !norm.includes("atencao")) return false;
+      if ((sfn.includes("atenção") || sfn.includes("atencao")) && !norm.includes("atenção") && !norm.includes("atencao") && !norm.includes("atencão")) return false;
       if (sfn.includes("atraso") && !norm.includes("atraso") && !norm.includes("bloqueio")) return false;
       if (sfn === "não iniciado" && !norm.includes("não iniciado") && !norm.includes("nao iniciado")) return false;
       if (sfn === "backlog" && !norm.includes("backlog")) return false;
@@ -165,15 +159,16 @@ function render() {
     const rows = filtered.filter(d => d["Grupo"] === g);
     html += `<div class="group-block"><div class="group-header">${g}</div>`;
     rows.forEach(r => {
-      const main = isMain(r);
+      const tipo = (r["Tipo"] || "").toLowerCase().trim();
+      const isMain = tipo === "main";
       const task = r["Entrega Prioritária"] || "";
       const resp = r["Responsável"] || "—";
       const prazo = r["Prazo"] || "—";
       const status = r["Status"] || "";
-      const comment = r["Comentário / Próximos Passos"] || r["Coment\u00e1rio / Pr\u00f3ximos Passos"] || "";
+      const comment = r["Comentário / Próximos Passos"] || r["Coment\u00e1rio / Pr\u00f3ximos Passos"] || r["Comentário"] || "";
       html += `<div class="delivery"><div class="delivery-row">
-        <div class="col col-task ${main ? 'is-main' : 'is-sub'}">
-          ${!main ? '<i class="ti ti-corner-down-right sub-icon" aria-hidden="true"></i>' : ''}
+        <div class="col col-task ${isMain ? 'is-main' : 'is-sub'}">
+          ${!isMain ? '<i class="ti ti-corner-down-right sub-icon" aria-hidden="true"></i>' : ''}
           <span>${task}</span>
         </div>
         <div class="col col-meta">${resp}</div>
